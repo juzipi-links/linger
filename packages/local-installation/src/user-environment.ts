@@ -12,6 +12,8 @@ import {
 // installer generates (ports, seeds, database addresses) or does not read.
 export const USER_ENVIRONMENT_KEYS = [
   "COMPOSIO_API_KEY",
+  "TEAMHUB_FEISHU_APP_ID",
+  "TEAMHUB_FEISHU_APP_SECRET",
   "SONIOX_API_KEY",
   "XAI_API_KEY",
   "TZ",
@@ -25,6 +27,10 @@ const TEMPLATE = `# Your own keys for this Linger instance. Linger reads only th
 
 # Connected apps such as Gmail, GitHub and Slack (Composio).
 COMPOSIO_API_KEY=
+# Feishu messaging via the Composio LARK toolkit. Set both values and register:
+# https://backend.composio.dev/api/v3/toolkits/auth/callback
+TEAMHUB_FEISHU_APP_ID=
+TEAMHUB_FEISHU_APP_SECRET=
 # Voice keys are normally saved in the Linger app; a key here overrides the
 # app's.
 # Recording, dictation and meeting transcripts (Soniox).

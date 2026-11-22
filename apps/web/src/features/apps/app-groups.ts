@@ -43,7 +43,11 @@ export const APP_GROUPS: readonly AppGroup[] = [
     title: m.groupProductivity,
     apps: ["github", "notion", "linear"],
   },
-  { id: "messaging", title: m.groupMessaging, apps: ["slack", "discord"] },
+  {
+    id: "messaging",
+    title: m.groupMessaging,
+    apps: ["feishu", "slack", "discord"],
+  },
   {
     id: "design-creative",
     title: m.groupDesignCreative,
@@ -64,6 +68,7 @@ const APP_SUMMARIES: Record<string, Message> = {
   calendly: m.summaryCalendly,
   canva: m.summaryCanva,
   discord: m.summaryDiscord,
+  feishu: m.summaryFeishu,
   fal_ai: m.summaryFalAi,
   figma: m.summaryFigma,
   github: m.summaryGitHub,
@@ -98,6 +103,7 @@ const APP_DESCRIPTIONS: Record<string, Message<string>> = {
   calendly: d.calendly,
   canva: d.canva,
   discord: d.discord,
+  feishu: d.feishu,
   facebook: d.facebook,
   fal_ai: d.falAi,
   figma: d.figma,

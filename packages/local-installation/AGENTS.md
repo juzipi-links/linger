@@ -40,7 +40,8 @@ login errors, or an unprovisioned account whose login fails must not be treated
 as a changed password.
 
 Each instance directory holds `user.env` (0600), the only file a person edits:
-`COMPOSIO_API_KEY`, `SONIOX_API_KEY`, `XAI_API_KEY` and `TZ`
+`COMPOSIO_API_KEY`, `TEAMHUB_FEISHU_APP_ID`,
+`TEAMHUB_FEISHU_APP_SECRET`, `SONIOX_API_KEY`, `XAI_API_KEY` and `TZ`
 (`user-environment.ts`). Every mode merges it into the generated
 `compose.env` / `native.env` over a developer checkout's `.env` and under the
 installer's own values; other names are ignored with a warning, and the file

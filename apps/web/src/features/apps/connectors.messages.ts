@@ -29,6 +29,7 @@ export const connectorMessages = defineMessages("connectors", {
   summaryCalendly: "Scheduling links and events",
   summaryCanva: "Designs and presentations",
   summaryDiscord: "Servers and channels",
+  summaryFeishu: "Chats and messages",
   summaryFalAi: "Generative media models",
   summaryFigma: "Design files",
   summaryGitHub: "Repositories and activity",

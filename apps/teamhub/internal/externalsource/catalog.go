@@ -147,6 +147,7 @@ var curatedApps = []ExternalApp{
 	{Key: "googledrive", DisplayName: "Google Drive", Description: "Let Agents work with your Drive files.", Capabilities: []string{"connect", "agent_tools"}, AllowsMultipleConnections: true},
 	{Key: "slack", DisplayName: "Slack", Description: "Connect workspaces and selected channels.", Capabilities: []string{"connect", "personal_wiki_import", "agent_tools"}, AllowsMultipleConnections: true},
 	{Key: "discord", DisplayName: "Discord", Description: "Connect one installed Discord server and selected channels.", Capabilities: []string{"connect", "personal_wiki_import", "agent_tools"}, AllowsMultipleConnections: true},
+	{Key: "feishu", DisplayName: "Feishu", Description: "Connect a Feishu account using a deployment-configured Feishu OAuth app.", Capabilities: []string{"connect", "agent_tools"}, AllowsMultipleConnections: true, customAuthScheme: "OAUTH2"},
 	{Key: "facebook", DisplayName: "Facebook", Description: "Connect supported Facebook content.", AllowsMultipleConnections: true},
 	{Key: "github", DisplayName: "GitHub", Description: "Import a public profile and selected owned repositories, and let authorized Agents read repositories, issues, and pull requests.", Capabilities: []string{"connect", "personal_wiki_import"}, AllowsMultipleConnections: true},
 	{Key: "google_meet", DisplayName: "Google Meet", Description: "Connect available Google Meet records.", AllowsMultipleConnections: true},
@@ -160,6 +161,17 @@ var curatedApps = []ExternalApp{
 	{Key: "granola", DisplayName: "Granola", Description: "Let Agents read your Granola meeting notes and transcripts.", Capabilities: []string{"connect", "agent_tools"}, AllowsMultipleConnections: true, customAuthScheme: "DCR_OAUTH"},
 	{Key: "calendly", DisplayName: "Calendly", Description: "Let Agents work with your Calendly event types and scheduled events.", Capabilities: []string{"connect", "agent_tools"}, AllowsMultipleConnections: true},
 	{Key: "outlook_calendar", DisplayName: "Outlook Calendar", Description: "Let Agents work with your Outlook calendars and events.", Capabilities: []string{"connect", "agent_tools"}, AllowsMultipleConnections: true},
+}
+
+// appConfigured checks additional per-app requirements beyond the shared
+// Composio project key.
+func (s *Service) appConfigured(appKey string) bool {
+	switch appKey {
+	case "feishu":
+		return s.managed != nil && s.managed.client != nil && s.managed.client.HasCustomOAuthCredentials("lark")
+	default:
+		return true
+	}
 }
 
 // CatalogAppKeys returns the sorted keys of every connectable app. The catalog
@@ -188,9 +200,9 @@ func (s *Service) ListApps() []ExternalApp {
 	return apps
 }
 
-// catalogApp projects one curated app. An app is available only while a
-// Composio API key is configured; otherwise it offers nothing an Agent could
-// request.
+// catalogApp projects one curated app. An app is available only while the
+// Composio provider and any app-specific credentials are configured; otherwise
+// it offers nothing an Agent could request.
 func (s *Service) catalogApp(appKey string) (ExternalApp, bool) {
 	index := slices.IndexFunc(curatedApps, func(app ExternalApp) bool { return app.Key == appKey })
 	if index < 0 {
@@ -201,7 +213,7 @@ func (s *Service) catalogApp(appKey string) (ExternalApp, bool) {
 	app.LogoURL = composioLogoBase + toolkitForApp(app.Key)
 	app.Availability = AppAvailabilityUnavailable
 	app.Capabilities = []string{}
-	if s.ProviderConfigured() {
+	if s.ProviderConfigured() && s.appConfigured(app.Key) {
 		app.Availability = AppAvailabilityAvailable
 		app.Capabilities = []string{"connect", "agent_tools"}
 		// Wiki import and trusted reauthorization need a confirmed account identity.

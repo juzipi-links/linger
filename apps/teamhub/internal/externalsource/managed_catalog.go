@@ -17,8 +17,8 @@ import (
 const managedAuthScheme = "OAUTH2"
 
 // appAuth returns the auth config scheme of a curated app and whether
-// Composio manages it. A custom config carries no credentials: its connect
-// link collects whatever the user provides.
+// Composio manages it. A custom config uses credentials supplied by the
+// deployment or collected from the user during connection.
 func appAuth(appKey string) (scheme string, managed bool) {
 	index := slices.IndexFunc(curatedApps, func(app ExternalApp) bool { return app.Key == appKey })
 	if index >= 0 && curatedApps[index].customAuthScheme != "" {
@@ -191,6 +191,8 @@ func toolkitForApp(key string) string {
 	switch key {
 	case "discord":
 		return "discordbot"
+	case "feishu":
+		return "lark"
 	case "google_calendar":
 		return "googlecalendar"
 	case "google_meet":

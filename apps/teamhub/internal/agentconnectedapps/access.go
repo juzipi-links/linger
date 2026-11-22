@@ -71,8 +71,9 @@ func onlyQueries(document any) bool {
 // Discord reads of the connected guild, its channels, threads, and messages
 // (which run at once only inside the connected guild; see discordReadInScope), the
 // Slack reads Agents make through the generic execute to find direct messages
-// and the people in them, and the Linear reads, which have no wrapped command.
-// A read the generic execute names outside this list is held like a write.
+// and the people in them, the Lark reads that list visible chats and search
+// messages, and the Linear reads, which have no wrapped command. A read the
+// generic execute names outside this list is held like a write.
 var readTools = map[string]bool{
 	"DISCORDBOT_GET_CONNECTED_GUILD":                      true,
 	"DISCORDBOT_GET_GUILD":                                true,
@@ -117,6 +118,9 @@ var readTools = map[string]bool{
 	"GOOGLEDRIVE_GET_FILE_METADATA":                       true,
 	"HIGGSFIELD_MCP_JOB_STATUS":                           true,
 	"HIGGSFIELD_MCP_MODELS_EXPLORE":                       true,
+	"LARK_GROUP_CHAT_LIST_USER_CHATS":                     true,
+	"LARK_GROUP_CHAT_SEARCH_VISIBLE_CHATS":                true,
+	"LARK_SEARCH_SEARCH_MESSAGE":                          true,
 	"LINEAR_GET_ALL_LINEAR_TEAMS":                         true,
 	"LINEAR_GET_ATTACHMENT":                               true,
 	"LINEAR_GET_COMMENT":                                  true,

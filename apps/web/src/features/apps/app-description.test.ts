@@ -23,6 +23,19 @@ describe("appDescription", () => {
     ).toBe(zhCN.appDescriptions.slack);
   });
 
+  it("words Feishu's description by its app key", async () => {
+    await setLanguage("zh-CN");
+    expect(
+      appDescription(
+        app(
+          "feishu",
+          "Connect a Feishu account. This deployment must be configured with a Feishu app ID and secret.",
+        ),
+        translate,
+      ),
+    ).toBe(zhCN.appDescriptions.feishu);
+  });
+
   it("keeps TeamHub's text for an app this client does not know", async () => {
     await setLanguage("zh-CN");
     expect(

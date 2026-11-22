@@ -29,6 +29,8 @@ describe("readUserEnvironment", () => {
     const template = await readFile(file, "utf8");
     expect(parseEnv(template)).toEqual({
       COMPOSIO_API_KEY: "",
+      TEAMHUB_FEISHU_APP_ID: "",
+      TEAMHUB_FEISHU_APP_SECRET: "",
       SONIOX_API_KEY: "",
       XAI_API_KEY: "",
       TZ: "",
@@ -70,6 +72,18 @@ describe("readUserEnvironment", () => {
   );
 });
 
+  it("reads Feishu OAuth credentials from user.env", async () => {
+    const directory = await root();
+    await writeFile(
+      userEnvironmentFile(directory),
+      "TEAMHUB_FEISHU_APP_ID=cli_feishu\nTEAMHUB_FEISHU_APP_SECRET=secret-value\n",
+      { mode: 0o600 },
+    );
+    expect(await readUserEnvironment(directory)).toEqual({
+      TEAMHUB_FEISHU_APP_ID: "cli_feishu",
+      TEAMHUB_FEISHU_APP_SECRET: "secret-value",
+    });
+  });
 describe("userEnvironmentPending", () => {
   it("compares user.env with the configuration the services started with", async () => {
     const directory = await root();

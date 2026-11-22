@@ -199,10 +199,10 @@ describe("Connected apps", () => {
     ]);
     expect(sectionApps("Meetings")).toEqual(["Google Meet"]);
     expect(sectionApps("Productivity")).toEqual(["GitHub", "Notion"]);
-    expect(sectionApps("Messaging")).toEqual(["Slack", "Discord"]);
+    expect(sectionApps("Messaging")).toEqual(["Feishu", "Slack", "Discord"]);
     // Facebook belongs to no group, so the page does not offer it.
     expect(screen.queryByRole("button", { name: "Facebook" })).toBeNull();
-    expect(screen.getAllByText("Unavailable")).toHaveLength(3);
+    expect(screen.getAllByText("Unavailable")).toHaveLength(4);
     expect(
       within(screen.getByRole("button", { name: "Gmail" })).getByText(
         "Connected",
@@ -230,7 +230,7 @@ describe("Connected apps", () => {
       within(screen.getByRole("region", { name: "Application connections" }))
         .getAllByRole("article")
         .map((card) => within(card).getAllByRole("button")[0]!.ariaLabel),
-    ).toEqual(["Slack", "Discord"]);
+    ).toEqual(["Feishu", "Slack", "Discord"]);
 
     fireEvent.click(within(categories).getByRole("tab", { name: "All" }));
     fireEvent.click(screen.getByRole("button", { name: "Connected only" }));

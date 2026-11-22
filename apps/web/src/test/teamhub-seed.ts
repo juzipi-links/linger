@@ -1597,6 +1597,15 @@ export function createExternalSourceSeed() {
     },
     {
       allows_multiple_connections: true,
+      availability: "unavailable",
+      capabilities: [],
+      description:
+        "Connect a Feishu account. This deployment must be configured with a Feishu app ID and secret.",
+      display_name: "Feishu",
+      key: "feishu",
+    },
+    {
+      allows_multiple_connections: true,
       availability: "available",
       capabilities: [...reminders],
       description: "Connect workspaces and selected channels.",

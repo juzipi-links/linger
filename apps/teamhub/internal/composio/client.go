@@ -38,6 +38,8 @@ type Config struct {
 	MaxBodyBytes     int
 	MaxBatchBytes    int
 	MaxRetryAfter    time.Duration
+	// CustomAuthCredentials contains deployment-owned OAuth credentials keyed by toolkit slug.
+	CustomAuthCredentials map[string]map[string]string
 }
 
 type Client struct {
@@ -47,6 +49,7 @@ type Client struct {
 	// apiKey can be set after start, when a deployment saves its key in the product.
 	apiKey           atomic.Pointer[string]
 	callbackURL      string
+	customAuthCredentials map[string]map[string]string
 	httpClient       *http.Client
 	retryLimit       int
 	fetchConcurrency int
@@ -247,12 +250,28 @@ func New(cfg Config) (*Client, error) {
 		environmentKey: cfg.EnvironmentKey,
 		baseURL:        baseURL,
 		callbackURL:    strings.TrimSpace(cfg.CallbackURL),
+		customAuthCredentials: cloneCustomAuthCredentials(cfg.CustomAuthCredentials),
 		httpClient:     cfg.HTTPClient, retryLimit: cfg.RetryLimit, fetchConcurrency: cfg.FetchConcurrency,
 		maxThreadBytes: cfg.MaxThreadBytes, maxBodyBytes: cfg.MaxBodyBytes, maxBatchBytes: cfg.MaxBatchBytes,
 		maxRetryAfter: cfg.MaxRetryAfter,
 	}
 	client.SetAPIKey(cfg.APIKey)
 	return client, nil
+}
+
+func cloneCustomAuthCredentials(input map[string]map[string]string) map[string]map[string]string {
+	if len(input) == 0 {
+		return nil
+	}
+	cloned := make(map[string]map[string]string, len(input))
+	for toolkit, credentials := range input {
+		copy := make(map[string]string, len(credentials))
+		for key, value := range credentials {
+			copy[key] = value
+		}
+		cloned[toolkit] = copy
+	}
+	return cloned
 }
 
 // ErrNotConfigured is returned by every request while the client has no API key.
@@ -279,7 +298,8 @@ func (c *Client) key() string {
 func (c *Client) WithAPIKey(key string) *Client {
 	clone := &Client{
 		environmentKey: c.environmentKey, connectionAuthority: c.connectionAuthority, baseURL: c.baseURL,
-		callbackURL: c.callbackURL, httpClient: c.httpClient, retryLimit: c.retryLimit, fetchConcurrency: c.fetchConcurrency,
+		callbackURL: c.callbackURL, customAuthCredentials: cloneCustomAuthCredentials(c.customAuthCredentials),
+		httpClient: c.httpClient, retryLimit: c.retryLimit, fetchConcurrency: c.fetchConcurrency,
 		maxThreadBytes: c.maxThreadBytes, maxBodyBytes: c.maxBodyBytes, maxBatchBytes: c.maxBatchBytes, maxRetryAfter: c.maxRetryAfter,
 	}
 	clone.SetAPIKey(key)

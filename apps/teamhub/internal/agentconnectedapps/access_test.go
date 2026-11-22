@@ -206,6 +206,7 @@ var cardTools = []string{
 	"GMAIL_SEND_EMAIL", "GMAIL_SEND_DRAFT", "GMAIL_REPLY_TO_THREAD",
 	"OUTLOOK_SEND_EMAIL", "OUTLOOK_SEND_DRAFT",
 	"SLACK_SEND_MESSAGE", "SLACK_UPLOAD_OR_CREATE_A_FILE_IN_SLACK",
+	"LARK_MESSAGING_SEND_MESSAGE",
 	"NOTION_CREATE_NOTION_PAGE", "NOTION_ADD_MULTIPLE_PAGE_CONTENT", "NOTION_UPDATE_PAGE_MARKDOWN",
 	"GITHUB_CREATE_AN_ISSUE", "GITHUB_CREATE_AN_ISSUE_COMMENT",
 }
@@ -236,6 +237,21 @@ func TestAccessRunsDiscordReadsAndHoldsDiscordSends(t *testing.T) {
 	}
 	if accessOf("DISCORDBOT_CREATE_MESSAGE", nil) != accessConfirm {
 		t.Error("DISCORDBOT_CREATE_MESSAGE posts to Discord and must wait for confirmation")
+	}
+}
+
+func TestFeishuMessageReadsRunAndSendsWaitForConfirmation(t *testing.T) {
+	for _, slug := range []string{
+		"LARK_SEARCH_SEARCH_MESSAGE",
+		"LARK_GROUP_CHAT_SEARCH_VISIBLE_CHATS",
+		"LARK_GROUP_CHAT_LIST_USER_CHATS",
+	} {
+		if accessOf(slug, nil) != accessRead {
+			t.Errorf("%s is read-only and must run without confirmation", slug)
+		}
+	}
+	if accessOf("LARK_MESSAGING_SEND_MESSAGE", nil) != accessConfirm {
+		t.Error("LARK_MESSAGING_SEND_MESSAGE must wait for sponsor confirmation")
 	}
 }
 

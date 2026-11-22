@@ -272,7 +272,8 @@ Gateway and runs Agents. The daemon exits with the app.
   the renewal named when it never bound a Daemon Identity and has no Agents
   (the orphan that earlier Set Up Again left), in the same transaction.
   Before installing or resuming it moves the
-  `COMPOSIO_API_KEY`, `SONIOX_API_KEY`, `XAI_API_KEY` and `TZ` of an unpacked
+  `COMPOSIO_API_KEY`, `TEAMHUB_FEISHU_APP_ID`,
+  `TEAMHUB_FEISHU_APP_SECRET`, `SONIOX_API_KEY`, `XAI_API_KEY` and `TZ` of an unpacked
   source package's `.env` into `<home>/instances/desktop/user.env` once and
   deletes that `.env` (never a `LINGER_CHECKOUT`'s), logging only the names
   of other values it drops; the installer reads only `user.env` for the

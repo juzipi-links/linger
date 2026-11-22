@@ -20,6 +20,8 @@ var teamhubEnvironment = []string{
 	"TEAMHUB_ARTIFACT_STORAGE_ROOT",
 	"TEAMHUB_DOCUMENT_PREVIEW_PUBLIC_ORIGIN",
 	"COMPOSIO_API_KEY",
+	"TEAMHUB_FEISHU_APP_ID",
+	"TEAMHUB_FEISHU_APP_SECRET",
 	"TEAMHUB_LOCAL_IDENTITY_KEY",
 	"TEAMHUB_COMPOSIO_ENVIRONMENT_KEY",
 	"WEB_PUBLIC_ORIGIN",
@@ -93,6 +95,41 @@ func TestLoadDefaultsAndEnvironmentCompatibility(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cfg.CORSAllowedOrigins, []string{"http://localhost:3000", "http://127.0.0.1:3000"}) {
 		t.Fatalf("unexpected default CORS origins: %v", cfg.CORSAllowedOrigins)
+	}
+}
+
+func TestLoadFeishuOAuthCredentialsRequireBothValues(t *testing.T) {
+	for _, test := range []struct {
+		name, appID, appSecret string
+	}{
+		{name: "app ID only", appID: "cli_feishu"},
+		{name: "app secret only", appSecret: "feishu-secret"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			clearTeamHubEnvironment(t)
+			t.Setenv("TEAMHUB_DATABASE_URL", "postgres://environment.example/teamhub")
+			if test.appID != "" {
+				t.Setenv("TEAMHUB_FEISHU_APP_ID", test.appID)
+			}
+			if test.appSecret != "" {
+				t.Setenv("TEAMHUB_FEISHU_APP_SECRET", test.appSecret)
+			}
+			if _, err := Load(); err == nil || !strings.Contains(err.Error(), "TEAMHUB_FEISHU_APP_ID") {
+				t.Fatalf("Load error = %v, want a paired Feishu credential error", err)
+			}
+		})
+	}
+
+	clearTeamHubEnvironment(t)
+	t.Setenv("TEAMHUB_DATABASE_URL", "postgres://environment.example/teamhub")
+	t.Setenv("TEAMHUB_FEISHU_APP_ID", "cli_feishu")
+	t.Setenv("TEAMHUB_FEISHU_APP_SECRET", "feishu-secret")
+	cfg, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.ExternalApps.FeishuAppID != "cli_feishu" || cfg.ExternalApps.FeishuAppSecret != "feishu-secret" {
+		t.Fatalf("unexpected Feishu OAuth config: %+v", cfg.ExternalApps)
 	}
 }
 

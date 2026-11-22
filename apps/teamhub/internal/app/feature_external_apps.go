@@ -22,9 +22,23 @@ import (
 // provider a test injects. The Composio API key can be saved on the Apps page
 // after start, so connected apps are built either way; each job and each Agent
 // request checks connectedAppsConfigured when it runs.
+func feishuAuthCredentials(cfg config.ExternalAppsConfig) map[string]map[string]string {
+	if cfg.FeishuAppID == "" || cfg.FeishuAppSecret == "" {
+		return nil
+	}
+	return map[string]map[string]string{
+		"lark": {
+			"client_id":          cfg.FeishuAppID,
+			"client_secret":      cfg.FeishuAppSecret,
+			"oauth_redirect_uri": composio.LarkOAuthRedirectURI,
+		},
+	}
+}
+
 func (a *App) registerExternalApps(ctx context.Context, cfg config.ExternalAppsConfig, injected externalsource.Provider, agentAuthorization *agentauth.Service) error {
 	client, err := composio.New(composio.Config{
 		BaseURL: cfg.ComposioBaseURL, APIKey: cfg.ComposioAPIKey, EnvironmentKey: cfg.ComposioEnvironmentKey,
+		CustomAuthCredentials: feishuAuthCredentials(cfg),
 		CallbackURL:      composio.OAuthCallbackURL(a.cfg.PublicWebURL),
 		HTTPClient:       &http.Client{Timeout: config.ExternalSourceRequestTimeout},
 		FetchConcurrency: config.ExternalSourceFetchConcurrency,

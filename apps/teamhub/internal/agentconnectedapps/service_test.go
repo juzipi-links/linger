@@ -106,6 +106,35 @@ func TestOutlookCalendarAllowsOnlyCalendarTools(t *testing.T) {
 	}
 }
 
+func TestSearchToolsLimitsFeishuToMessagingTools(t *testing.T) {
+	provider := &fakeToolProvider{toolsByToolkit: map[string][]composio.Tool{
+		"lark": {
+			tool("LARK_SEARCH_SEARCH_MESSAGE", "lark"),
+			tool("LARK_GROUP_CHAT_SEARCH_VISIBLE_CHATS", "lark"),
+			tool("LARK_GROUP_CHAT_LIST_USER_CHATS", "lark"),
+			tool("LARK_MESSAGING_SEND_MESSAGE", "lark"),
+			tool("LARK_DOCS_SEARCH_FOR_A_DOCUMENT", "lark"),
+			tool("LARK_CALENDAR_SEARCH_FOR_EVENTS", "lark"),
+		},
+	}}
+	service := &Service{provider: provider}
+	connections := []externalsource.AgentToolConnection{
+		{ID: "connection-feishu", AppKey: "feishu", ToolkitSlug: "lark", UpstreamConnectionID: "ca-feishu"},
+	}
+	found, err := service.searchTools(t.Context(), connections, "messages", 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(found) != 4 {
+		t.Fatalf("Feishu must expose only its four messaging tools, got %+v", found)
+	}
+	for _, item := range found {
+		if !appAllowsTool("feishu", item.ToolSlug) {
+			t.Errorf("non-messaging tool escaped Feishu scope: %s", item.ToolSlug)
+		}
+	}
+}
+
 func TestExecutionErrorsAreNeverRetryableAfterDispatch(t *testing.T) {
 	for _, cause := range []error{
 		nil, errors.New("private provider error"), &composio.RateLimitError{},

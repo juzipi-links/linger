@@ -24,6 +24,11 @@ Go service owning Human HTTP/SSE, Agent callbacks, and active product state.
 - Connector authorization defaults to the public Web callback. For a desktop
   request, pass only a validated one-time loopback address to Composio.
   TeamHub verifies connection status independently under the signed-in Account.
+- Feishu uses the Composio `lark` toolkit with a deployment-owned custom OAuth2
+  app. Set `TEAMHUB_FEISHU_APP_ID` and `TEAMHUB_FEISHU_APP_SECRET` together;
+  register Composio's callback
+  (`https://backend.composio.dev/api/v3/toolkits/auth/callback`) in the Feishu
+  developer console. TeamHub exposes only the messaging allowlist for this app.
 - `internal/<feature>`: business behavior, transactions and data access with
   package tests: `collaboration` (Human Rooms and Messages),
   `agentregistry` (Agents, templates, Skill bindings, Another Me),

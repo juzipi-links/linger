@@ -11,7 +11,7 @@ import (
 
 var fixedAppToolkits = []struct{ key, toolkit string }{
 	{"gmail", "gmail"}, {"outlook", "outlook"}, {"googledrive", "googledrive"}, {"slack", "slack"},
-	{"discord", "discordbot"}, {"facebook", "facebook"}, {"github", "github"}, {"google_meet", "googlemeet"},
+	{"discord", "discordbot"}, {"feishu", "lark"}, {"facebook", "facebook"}, {"github", "github"}, {"google_meet", "googlemeet"},
 	{"google_calendar", "googlecalendar"}, {"notion", "notion"}, {"linear", "linear"}, {"figma", "figma"}, {"canva", "canva"},
 	{"higgsfield", "higgsfield_mcp"}, {"fal_ai", "fal_ai"}, {"granola", "granola_mcp"}, {"calendly", "calendly"}, {"outlook_calendar", "outlook"},
 }
@@ -35,7 +35,7 @@ func TestAppAuthUsesManagedOAuthUnlessCustom(t *testing.T) {
 	for _, test := range []struct {
 		key, scheme string
 		managed     bool
-	}{{"linear", "OAUTH2", true}, {"gmail", "OAUTH2", true}, {"higgsfield", "DCR_OAUTH", false}, {"fal_ai", "API_KEY", false}, {"granola", "DCR_OAUTH", false}, {"calendly", "OAUTH2", true}, {"outlook_calendar", "OAUTH2", true}} {
+	}{{"linear", "OAUTH2", true}, {"gmail", "OAUTH2", true}, {"higgsfield", "DCR_OAUTH", false}, {"fal_ai", "API_KEY", false}, {"granola", "DCR_OAUTH", false}, {"feishu", "OAUTH2", false}, {"calendly", "OAUTH2", true}, {"outlook_calendar", "OAUTH2", true}} {
 		if scheme, managed := appAuth(test.key); scheme != test.scheme || managed != test.managed {
 			t.Errorf("appAuth(%s) = %s %t", test.key, scheme, managed)
 		}
@@ -88,6 +88,7 @@ func TestAppCatalogKeepsManagedAvailabilitySeparateFromImportCapabilities(t *tes
 		{"granola", false, false},
 		{"calendly", false, false},
 		{"outlook_calendar", false, false},
+		{"feishu", false, false},
 	} {
 		index := slices.IndexFunc(apps, func(app ExternalApp) bool { return app.Key == test.key })
 		if index < 0 {
@@ -114,6 +115,19 @@ func TestAppCatalogKeepsManagedAvailabilitySeparateFromImportCapabilities(t *tes
 		if slices.Contains(app.Capabilities, "mutated") {
 			t.Fatal("catalog response aliases the curated definitions")
 		}
+	}
+}
+
+func TestFeishuCatalogRequiresCustomOAuthCredentials(t *testing.T) {
+	client, err := composio.New(composio.Config{APIKey: "test-key", EnvironmentKey: "test"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	service := New(nil, client)
+	service.managed = &managedCatalog{client: client}
+	app, ok := service.catalogApp("feishu")
+	if !ok || app.Availability != AppAvailabilityUnavailable || len(app.Capabilities) != 0 {
+		t.Fatalf("Feishu must stay unavailable without its OAuth credentials: %+v", app)
 	}
 }
 
@@ -152,7 +166,16 @@ func TestAppCatalogMarksProactiveReminderAppsOnlyWhenConnectable(t *testing.T) {
 
 func configuredManagedCatalog(t *testing.T) *managedCatalog {
 	t.Helper()
-	client, err := composio.New(composio.Config{APIKey: "test-key", EnvironmentKey: "test"})
+	client, err := composio.New(composio.Config{
+		APIKey: "test-key", EnvironmentKey: "test",
+		CustomAuthCredentials: map[string]map[string]string{
+			"lark": {
+				"client_id": "test-feishu-client",
+				"client_secret": "test-feishu-secret",
+				"oauth_redirect_uri": composio.LarkOAuthRedirectURI,
+			},
+		},
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -9,6 +9,8 @@ export const appDescriptionMessages = defineMessages("appDescriptions", {
   googleDrive: "Let Agents work with your Drive files.",
   slack: "Connect workspaces and selected channels.",
   discord: "Connect one installed Discord server and selected channels.",
+  feishu:
+    "Connect a Feishu account. This deployment must be configured with a Feishu app ID and secret.",
   facebook: "Connect supported Facebook content.",
   github:
     "Import a public profile and selected owned repositories, and let authorized Agents read repositories, issues, and pull requests.",

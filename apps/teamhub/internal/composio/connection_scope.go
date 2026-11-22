@@ -2,8 +2,12 @@ package composio
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"regexp"
+	"sort"
+	"strings"
 )
 
 var ErrConnectionScope = errors.New("connected app does not belong to this environment")
@@ -31,7 +35,24 @@ func (c *Client) UserIDForAccount(accountID string) string {
 // AuthConfigName is the stable name TeamHub finds or creates the auth config
 // of toolkit under.
 func (c *Client) AuthConfigName(toolkit, scheme string) string {
-	return "linger:" + c.environmentKey + ":" + toolkit + ":" + scheme + ":v1"
+	version := "v1"
+	if credentials := c.customAuthCredentials[toolkit]; len(credentials) > 0 {
+		keys := make([]string, 0, len(credentials))
+		for key := range credentials {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+		var fingerprint strings.Builder
+		for _, key := range keys {
+			fingerprint.WriteString(key)
+			fingerprint.WriteByte(0)
+			fingerprint.WriteString(credentials[key])
+			fingerprint.WriteByte(0)
+		}
+		digest := sha256.Sum256([]byte(fingerprint.String()))
+		version += "-" + hex.EncodeToString(digest[:8])
+	}
+	return "linger:" + c.environmentKey + ":" + toolkit + ":" + scheme + ":" + version
 }
 
 func (c *Client) authorizeConnection(ctx context.Context, upstreamID string) (ConnectionBinding, error) {

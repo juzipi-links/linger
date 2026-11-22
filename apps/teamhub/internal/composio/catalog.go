@@ -6,7 +6,11 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 )
+
+// LarkOAuthRedirectURI is Composio's v3 callback for custom OAuth2 apps.
+const LarkOAuthRedirectURI = "https://backend.composio.dev/api/v3/toolkits/auth/callback"
 
 type AuthConfig struct {
 	ID         string `json:"id"`
@@ -70,12 +74,28 @@ func (c *Client) FindAuthConfig(ctx context.Context, toolkit, name, scheme strin
 	return selected, selected.ID != "", nil
 }
 
+// HasCustomOAuthCredentials reports whether toolkit has the client credentials
+// required to create a custom OAuth2 auth config.
+func (c *Client) HasCustomOAuthCredentials(toolkit string) bool {
+	if c == nil {
+		return false
+	}
+	credentials := c.customAuthCredentials[toolkit]
+	return strings.TrimSpace(credentials["client_id"]) != "" &&
+		strings.TrimSpace(credentials["client_secret"]) != ""
+}
+
 // CreateAuthConfig creates a Composio-managed auth config, or a custom one
-// without credentials, whose connect link collects everything the scheme needs.
+// using deployment-provided credentials. Schemes whose user supplies a key at
+// connect time continue to use an empty credentials map.
 func (c *Client) CreateAuthConfig(ctx context.Context, toolkit, name, scheme string, managed bool) (AuthConfig, error) {
 	authConfig := map[string]any{"type": "use_composio_managed_auth", "name": name, "auth_scheme": scheme}
 	if !managed {
-		authConfig = map[string]any{"type": "use_custom_auth", "name": name, "authScheme": scheme, "credentials": map[string]any{}}
+		credentials := make(map[string]any, len(c.customAuthCredentials[toolkit]))
+		for key, value := range c.customAuthCredentials[toolkit] {
+			credentials[key] = value
+		}
+		authConfig = map[string]any{"type": "use_custom_auth", "name": name, "authScheme": scheme, "credentials": credentials}
 	}
 	request := map[string]any{"toolkit": map[string]string{"slug": toolkit}, "auth_config": authConfig}
 	var response struct {

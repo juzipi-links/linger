@@ -22,10 +22,17 @@ instead.
 
 | Name               | Turns on                                                     |
 | ------------------ | ------------------------------------------------------------ |
-| `COMPOSIO_API_KEY` | Connected apps such as Gmail, GitHub and Slack               |
-| `SONIOX_API_KEY`   | Recording, dictation and meeting transcripts (overrides app) |
+| `COMPOSIO_API_KEY`          | Connected apps such as Gmail, GitHub and Slack                      |
+| `TEAMHUB_FEISHU_APP_ID`     | Feishu custom OAuth app ID for the Composio LARK messaging connector |
+| `TEAMHUB_FEISHU_APP_SECRET` | Feishu custom OAuth app secret; set together with the app ID          |
+| `SONIOX_API_KEY`            | Recording, dictation and meeting transcripts (overrides app)         |
 | `XAI_API_KEY`      | Grok Live voice mode, without Soniox (overrides app)         |
 | `TZ`               | The services' time zone, for example `America/New_York`      |
+
+For Feishu, create an app on the Feishu Open Platform and set both app
+credentials. Register Composio's callback URI
+`https://backend.composio.dev/api/v3/toolkits/auth/callback` in that app.
+Restart Linger after changing either value.
 
 Voice keys are normally saved in the app itself; a voice key written here
 still works and takes precedence over the one saved in the app.
